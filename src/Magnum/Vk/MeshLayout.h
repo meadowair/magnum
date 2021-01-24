@@ -227,6 +227,33 @@ class MAGNUM_VK_EXPORT MeshLayout {
         MeshLayout& operator=(MeshLayout&& other) noexcept;
 
         /**
+         * @brief Equality comparison
+         *
+         * Expects that neither instance has external `pNext` or other data
+         * pointers, as otherwise the implementation would have to be too
+         * complex and slow --- in short that means all bindings and attributes
+         * should be added via @ref addBinding(), @ref addInstancedBinding()
+         * and @ref addAttribute(), not by conversion from raw Vulkan
+         * structures or by direct editing of the underlying data.
+         *
+         * Given that @ref addBinding(), @ref addInstancedBinding() and
+         * @ref addAttribute() enforce monotonically increasing order,
+         * comparison is simple with a @f$ \mathcal{O}(n) @f$ complexity in the
+         * total number of bindings and attachments.
+         */
+        bool operator==(const MeshLayout& other) const;
+
+        /**
+         * @brief Non-equality comparison
+         *
+         * Inverse of @ref operator==(), see its documentation for more
+         * information.
+         */
+        bool operator!=(const MeshLayout& other) const {
+            return !operator==(other);
+        }
+
+        /**
          * @brief Add a buffer binding
          * @param binding   Binding index, to which a buffer subrange will be
          *      bound when drawing the mesh. Has to be unique among all
@@ -338,6 +365,10 @@ class MAGNUM_VK_EXPORT MeshLayout {
         }
 
     private:
+        #ifndef CORRADE_NO_ASSERT
+        MAGNUM_VK_LOCAL bool hasNoExternalPointers() const;
+        #endif
+
         VkPipelineVertexInputStateCreateInfo _vertexInfo;
         VkPipelineInputAssemblyStateCreateInfo _assemblyInfo;
 
