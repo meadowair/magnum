@@ -52,7 +52,9 @@ struct MeshLayoutTest: TestSuite::Tester {
     void addBinding();
     void addInstancedBinding();
     void addInstancedBindingDivisor();
+    void addBindingWrongOrder();
     void addAttribute();
+    void addAttributeWrongOrder();
 
     void debugMeshPrimitive();
 };
@@ -73,7 +75,9 @@ MeshLayoutTest::MeshLayoutTest() {
               &MeshLayoutTest::addBinding,
               &MeshLayoutTest::addInstancedBinding,
               &MeshLayoutTest::addInstancedBindingDivisor,
+              &MeshLayoutTest::addBindingWrongOrder,
               &MeshLayoutTest::addAttribute,
+              &MeshLayoutTest::addAttributeWrongOrder,
 
               &MeshLayoutTest::debugMeshPrimitive});
 }
@@ -312,6 +316,23 @@ void MeshLayoutTest::addInstancedBindingDivisor() {
     CORRADE_COMPARE(vertexDivisorInfo.pVertexBindingDivisors[1].divisor, 0);
 }
 
+void MeshLayoutTest::addBindingWrongOrder() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    MeshLayout layout{MeshPrimitive::Triangles};
+    layout.addBinding(15, 23);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    layout.addBinding(15, 27)
+        .addInstancedBinding(15, 27);
+    CORRADE_COMPARE(out.str(),
+        "Vk::MeshLayout::addBinding(): binding 15 can't be ordered after 15\n"
+        "Vk::MeshLayout::addInstancedBinding(): binding 15 can't be ordered after 15\n");
+}
+
 void MeshLayoutTest::addAttribute() {
     MeshLayout layout{MeshPrimitive::Triangles};
     layout.addAttribute(1, 35, VertexFormat::Vector2ui, 17)
@@ -327,6 +348,21 @@ void MeshLayoutTest::addAttribute() {
     CORRADE_COMPARE(layout.vkPipelineVertexInputStateCreateInfo().pVertexAttributeDescriptions[1].binding, 36);
     CORRADE_COMPARE(layout.vkPipelineVertexInputStateCreateInfo().pVertexAttributeDescriptions[1].format, VK_FORMAT_R64_SFLOAT);
     CORRADE_COMPARE(layout.vkPipelineVertexInputStateCreateInfo().pVertexAttributeDescriptions[1].offset, 22);
+}
+
+void MeshLayoutTest::addAttributeWrongOrder() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    MeshLayout layout{MeshPrimitive::Triangles};
+    layout.addAttribute(5, 17, {}, 0);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    layout.addAttribute(5, 25, {}, 1);
+    CORRADE_COMPARE(out.str(),
+        "Vk::MeshLayout::addAttribute(): location 5 can't be ordered after 5\n");
 }
 
 void MeshLayoutTest::debugMeshPrimitive() {
