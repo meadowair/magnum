@@ -57,6 +57,7 @@ set(MagnumVk_GracefulAssert_SRCS
     LayerProperties.cpp
     MeshLayout.cpp
     Memory.cpp
+    PipelineLayout.cpp
     PixelFormat.cpp
     RenderPass.cpp
     VertexFormat.cpp)
@@ -92,6 +93,8 @@ set(MagnumVk_HEADERS
     MemoryAllocateInfo.h
     MeshLayout.h
     Pipeline.h
+    PipelineLayout.h
+    PipelineLayoutCreateInfo.h
     PixelFormat.h
     Queue.h
     RenderPass.h
